@@ -127,7 +127,7 @@ def build(context, reporting_dt, P):
                 P("10.0%","Tiny")
             ],
             [
-                "Target",
+                P("Target","Tiny"),
                 P("CPI +4.5% over 3-year<br/>rolling periods", "Tiny"),
                 P("CPI +3% over 3-year<br/>rolling periods", "Tiny"),
                 P("CPI +1% over 3-year<br/>rolling periods", "Tiny")
@@ -167,6 +167,14 @@ def build(context, reporting_dt, P):
         returns_table,
     
         Spacer(1, 8*mm),
+
+        P("Depending on where in the Lifestage you are, your return will be different. Please note that you could be invested in a mix of portfolios given the phasing as one approaches "
+            "retirement. As you are member of a defined contribution fund, you carry the risk of investment performance, i.e. your retirement savings can be impacted by positive or "
+            "negative investment returns. Should there be a decline in the value of the assets underlying the Fund’s investments, the Management Board may, in terms of the Rules, "
+            "declare a negative fund interest rate in which case your benefits will be reduced accordingly. For more information on the investment strategy and returns, contact the Fund "
+            "Office.", "BodySmall"),
+
+        Spacer(1, 8*mm),
     
         section_header(P("YOUR TOTAL RETIREMENT SAVINGS = VESTED POT + SAVINGS POT + RETIREMENT POT", "SectionWhite"), width=table_width, bg_col=BLACK,box_col=BLACK),
         
@@ -181,7 +189,7 @@ def build(context, reporting_dt, P):
         P(
             "For your latest retirement savings balance, "
             "refer to your <b>Statement of Benefits</b> via WhatsApp 0860 933 333 or the Member Web (on Old Mutual Secure Services at " \
-            "<font color='blue'>https://secure.oldmutual.co.za)</font>.",
+            "<font color='blue'><u>https://secure.oldmutual.co.za</u></font>).",
             "BodySmall"
         ),
         Spacer(1, 6 * mm),

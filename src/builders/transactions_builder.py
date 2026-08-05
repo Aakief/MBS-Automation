@@ -44,6 +44,7 @@ def build_contributions_history(transactions_data) -> ContributionHistory:
         history.append(
             ContributionMonth (
                 month = contribution_date.strftime("%b-%y"),
+                month_no = contribution_date.strftime("%m"), #new addition
                 payment_date = contribution_date.strftime("%d/%m/%Y"),
                 member = member_amount,
                 employer = employer_amount,
