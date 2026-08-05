@@ -7,6 +7,9 @@ from utils import money, section_header
 from statement_templates.saccawu.styles import BLACK
 
 def build(context, reporting_dt, start_dt, P):
+
+    short_date = reporting_dt.strftime("%B %Y")
+    full_date = reporting_dt.strftime("%d %B %Y")
     
     rows = [[
         P("Details", "TinyBold"),
@@ -22,14 +25,16 @@ def build(context, reporting_dt, start_dt, P):
         "", "", "", "", ""
     ])
     
-    for contribution in context.contributions.history:
-        rows.append([
-            P(f"Month {contribution.month}", "Tiny"),
-            P(contribution.payment_date, "TinyRight"),
-            P(money(contribution.member), "TinyRight"),
-            P(money(contribution.employer), "TinyRight"),
-            P(money(contribution.voluntary), "TinyRight"),
-            "",
+    for contribution in sorted(
+        context.contributions.history, key=lambda x:x.month_no):
+
+            rows.append([
+                P(f"&nbsp;&nbsp;&nbsp;&nbsp;Month {contribution.month}", "Tiny"),
+                P(contribution.payment_date, "TinyRight"),
+                P(money(contribution.member), "TinyRight"),
+                P(money(contribution.employer), "TinyRight"),
+                P(money(contribution.voluntary), "TinyRight"),
+                "",
     ])
     
     rows += [[
@@ -53,9 +58,13 @@ def build(context, reporting_dt, start_dt, P):
             ""])
 
     rows += [
-        [P("Total Adjusting Transactions", "Tiny"), "", "", "", "", P(money(context.contributions.totals.adjusting_transactions), "Tiny")],
-        [P("Less Insurance Premiums & Administration Fees:", "Tiny"), "", "", P(money(context.contributions.totals.admin_fee, negative=True), "Tiny"), "", ""],
-        [P("Contributions to Retirement Funding", "Tiny"), "", P(money(context.contributions.totals.member_contributions), "TinyBold"), P(money(context.contributions.totals.employer_contributions), "TinyBold"), P(money(context.contributions.totals.voluntary), "TinyBold"), P(money(context.contributions.totals.retirement_funding), "TinyBold")]
+        [P("Total Adjusting Transactions", "Tiny"), "", "", "", "", P(money(context.contributions.totals.adjusting_transactions), "TinyRight")],
+        [P("Less Insurance Premiums & Administration Fees:", "Tiny"), "", "", P(money(context.contributions.totals.admin_fee, negative=True), "TinyRight"), "", P(money(context.contributions.totals.admin_fee, negative=True), "TinyRight")],
+        [P("Contributions to Retirement Funding", "Tiny"), "", 
+         P(f"<b>{money(context.contributions.totals.member_contributions)}</b>", "TinyRight"), 
+         P(f"<b>{money(context.contributions.totals.employer_contributions)}</b>", "TinyRight"), 
+         P(f"<b>{money(context.contributions.totals.voluntary)}</b>", "TinyRight"), 
+         P(f"<b>{money(context.contributions.totals.retirement_funding)}</b>", "TinyRight")]
         ]
     
     details_width = 170 * mm
@@ -119,8 +128,8 @@ def build(context, reporting_dt, start_dt, P):
         section_header(P(f"CONTRIBUTIONS FOR THE PERIOD {start_dt.strftime("%d/%m/%Y")} TO {reporting_dt.strftime("%d/%m/%Y")}", "SectionWhite"), width=details_width,bg_col=BLACK,box_col=BLACK),
         cont,
         Spacer(1, 5 * mm),
-        P(f"<br/>Please note:<br/><b><i>The {reporting_dt.strftime("%b %Y")} contributions may not be included in the Accumulated Credit, "
-        "if the contributions were not received and allocated prior to 30 June 2025.</i></b>", "BodySmall"),
+        P(f"<br/>Please note:<br/><b><i>The {short_date} contributions may not be included in the Accumulated Credit, "
+        f"if the contributions were not received and allocated prior to {full_date}.</i></b>", "BodySmall"),
         Spacer(1, 14 * mm),
         section_header(P(f"ACCOUNT TRANSACTIONS {start_dt.strftime("%d/%m/%Y")} - {reporting_dt.strftime("%d/%m/%Y")}", "SectionWhite"), width=details_width,bg_col=BLACK,box_col=BLACK),
         acc

@@ -46,5 +46,29 @@ def style():
             alignment=TA_RIGHT,
         )
     )
+
+    styles.add(
+        ParagraphStyle(
+            name="Date",
+            parent=styles["Body"],
+            alignment=TA_RIGHT,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="BulletBody",
+            parent=styles["Body"],
+            leftIndent=10,      # where wrapped lines start
+            firstLineIndent=-8, # pulls bullet into the margin
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="SubBulletBody",
+            parent=styles["Body"],
+            leftIndent=20,
+            firstLineIndent=-8,
+        )
+    )
     
     return styles

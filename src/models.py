@@ -43,6 +43,7 @@ class Salary:
 @dataclass
 class ContributionMonth:
     month: str
+    month_no: str
     payment_date: str
     member: float
     employer: float
