@@ -1,47 +1,50 @@
 from models import Member
 from utils import safe_str, safe_date
 
-def build_member(member_data) -> Member:
+def build_member(mbs_data) -> Member:
 
-    first_name = safe_str(member_data["firstname"].iloc[0], str.title)
-    last_name = safe_str(member_data["lastname"].iloc[0], str.title)
+    # Take the latest member information
+    latest_mbs_data = mbs_data.loc[mbs_data["pyrl_dt"].idxmax()]
+    
+    first_name = safe_str(latest_mbs_data["firstname"], str.title)
+    last_name = safe_str(latest_mbs_data["lastname"], str.title)
 
-    nat_id = safe_str(member_data["natlidno"].iloc[0], str.upper)
-    passport = safe_str(member_data["passport_no"].iloc[0], str.upper)
+    nat_id = safe_str(latest_mbs_data["natlidno"], str.upper)
+    passport = safe_str(latest_mbs_data["passport_no"], str.upper)
 
     return Member(
 
         name = f"{first_name} {last_name}".strip(),
 
-        member_number = safe_str(member_data["mbr_no"].iloc[0], str.upper),
+        member_number = safe_str(latest_mbs_data["mbr_no"], str.upper),
 
-        participating_employer = safe_str(member_data["plan_nm"].iloc[0], str.title),
+        participating_employer = safe_str(latest_mbs_data["plan_nm"], str.title),
 
-        scheme_code = safe_str(member_data["cont_no"].iloc[0], str.upper),
+        scheme_code = safe_str(latest_mbs_data["cont_no"], str.upper),
 
-        bill_group = safe_str(member_data["mbr_bill_grp"].iloc[0], str.title),
+        bill_group = safe_str(latest_mbs_data["bill_group"], str.title),
 
-        payroll_number = safe_str(member_data["pyrl_no"].iloc[0], str.upper),
+        payroll_number = safe_str(latest_mbs_data["pyrl_no"], str.upper),
 
-        prior_number = safe_str(member_data["pr_mbr_no"].iloc[0], str.upper),
+        prior_number = safe_str(latest_mbs_data["pr_mbr_no"], str.upper),
 
-        retirement_date = safe_date(member_data["nrd"].iloc[0]),
+        retirement_date = safe_date(latest_mbs_data["nrd"]),
 
-        date_of_birth = safe_date(member_data["birthdt"].iloc[0]),
+        date_of_birth = safe_date(latest_mbs_data["birthdt"]),
 
-        join_fund = safe_date(member_data["past_service_dt"].iloc[0]),
+        join_fund = safe_date(latest_mbs_data["join_scheme_dt"]),
 
-        join_company = safe_date(member_data["join_scheme_dt"].iloc[0]),
+        join_company = safe_date(latest_mbs_data["join_dt"]),
 
         id_number = nat_id if nat_id else passport,
 
-        tax_number = safe_str(member_data["tax_ref_no_payroll"].iloc[0], str.upper),
+        tax_number = safe_str(latest_mbs_data["tax_ref_no"], str.upper),
 
-        client_number = safe_str(member_data["nameid"].iloc[0], str.upper),
+        client_number = safe_str(latest_mbs_data["nameid"], str.upper),
 
-        cell_phone = safe_str(member_data["recent_phone"].iloc[0]),
+        cell_phone = safe_str(latest_mbs_data["mobilephone"]),
 
-        email = safe_str(member_data["recent_email"].iloc[0], str.lower),
+        email = safe_str(latest_mbs_data["email_addr"], str.lower),
 
-        pay_centre = ""
+        pay_centre = safe_str(latest_mbs_data["pay_centre"], str.title)
     )
