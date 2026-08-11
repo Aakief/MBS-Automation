@@ -2,9 +2,9 @@ import pandas as pd
 from utils import total
 from models import ContributionHistory, ContributionTotals, ContributionMonth, TransactionSummary
 
-def build_contributions_history(transactions_data) -> ContributionHistory:
+def build_contributions_history(mbs_data) -> ContributionHistory:
 
-    if transactions_data is None or transactions_data.empty:
+    if mbs_data is None or mbs_data.empty:
         return ContributionHistory (
             history = [],
             totals = ContributionTotals (
@@ -27,12 +27,12 @@ def build_contributions_history(transactions_data) -> ContributionHistory:
     total_voluntary = 0
     total_admin_fee = 0
 
-    for _, row in transactions_data.iterrows():
+    for _, row in mbs_data.iterrows():
 
-        contribution_date = pd.to_datetime(row["contribution_dt"])
+        payroll_date = pd.to_datetime(row["pyrl_dt"])
 
-        member_amount = row["member_contribution"]
-        employer_amount = row["employer_contribution"]
+        member_amount = row["ee_contribs"]
+        employer_amount = row["er_contribs"]
         voluntary_amount = row["member_voluntary"]
         admin_fee = row["admin_fee"]
 
@@ -43,9 +43,9 @@ def build_contributions_history(transactions_data) -> ContributionHistory:
 
         history.append(
             ContributionMonth (
-                month = contribution_date.strftime("%b-%y"),
-                month_no = contribution_date.strftime("%m"), #new addition
-                payment_date = contribution_date.strftime("%d/%m/%Y"),
+                month = payroll_date.strftime("%b-%y"),
+                month_no = payroll_date.strftime("%m"),
+                payment_date = payroll_date.strftime("%d/%m/%Y"),
                 member = member_amount,
                 employer = employer_amount,
                 voluntary = voluntary_amount,
@@ -83,16 +83,18 @@ def build_contributions_history(transactions_data) -> ContributionHistory:
         )
     )
     
-def build_transaction_summary(transactions_data, tp_investment_data, total_contributions) -> TransactionSummary:
+def build_transaction_summary(mbs_data, accumulated_credit, total_contributions) -> TransactionSummary:
     
+    s14_trf_in = total(mbs_data, "member_s14_in")
+    int_trf_in = total(mbs_data, "employer_s14_in")
+    court_divorce = abs(total(mbs_data, "divore_court_order"))
+    spot_withdrawals = abs(total(mbs_data, "spot_withdrawal"))
+    
+    # Take the latest member information
+    first_mbs_data = mbs_data.loc[mbs_data["pyrl_dt"].idxmin()]
 
-    s14_trf_in = total(transactions_data, "member_s14_in")
-    int_trf_in = total(transactions_data, "employer_s14_in")
-    court_divorce = abs(total(transactions_data, "divore_court_order"))
-    spot_withdrawals = abs(total(transactions_data, "spot_withdrawal"))
-    investment_returns = 0 
-    acc_credit = total(tp_investment_data, "accumulated_credit")
-    opening_balance = acc_credit - investment_returns + spot_withdrawals + court_divorce - s14_trf_in - int_trf_in - total_contributions 
+    opening_balance = total(first_mbs_data, "opening_balance")
+    investment_returns = accumulated_credit - opening_balance + spot_withdrawals + court_divorce - s14_trf_in - int_trf_in - total_contributions
 
     return TransactionSummary (
         
@@ -103,5 +105,5 @@ def build_transaction_summary(transactions_data, tp_investment_data, total_contr
         spot_withdrawals = spot_withdrawals,
         investment_returns = investment_returns,  
         total_contributions = total_contributions,
-        accumulated_credit = acc_credit
+        accumulated_credit = accumulated_credit
     )

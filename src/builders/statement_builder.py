@@ -7,23 +7,23 @@ from .benefits_builder import build_benefits
 from .transactions_builder import build_contributions_history, build_transaction_summary
 from models import StatementContext
 
-def build_statement_context(member_data, transactions_data, tp_investment_data) -> StatementContext:
+def build_statement_context(mbs_data) -> StatementContext:
 
-    contributions_history = build_contributions_history(transactions_data)
-    investments = build_investment(tp_investment_data)
-    salary = build_salary(transactions_data)
+    contributions_history = build_contributions_history(mbs_data)
+    investments = build_investment(mbs_data)
+    salary = build_salary(mbs_data)
 
     return StatementContext (
 
-        member = build_member(member_data),
+        member = build_member(mbs_data),
 
         salary = salary,
 
         contributions = contributions_history,
             
         transactions = build_transaction_summary(
-                        transactions_data, 
-                        tp_investment_data, 
+                        mbs_data,
+                        investments.portfolio.accumulated_credit, 
                         contributions_history.totals.retirement_funding
                         ),    
 

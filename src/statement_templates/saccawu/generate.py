@@ -36,13 +36,9 @@ def draw_cover_letter_header(c, doc, old_mutual_header):
     )
     c.restoreState()
 
-def generate_statement(member_data, contributions_data, investment_data, output_path, old_mutual_header, logo, reporting_dt, start_dt):
+def generate_statement(mbs_data, output_path, old_mutual_header, logo, reporting_dt, start_dt):
     
-    context = build_statement_context(
-        member_data,
-        contributions_data,
-        investment_data
-    )
+    context = build_statement_context(mbs_data)
     
     story = []
     pages = [
