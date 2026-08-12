@@ -5,6 +5,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph, Table, TableStyle, Image as RLImage
 from reportlab.graphics.shapes import Drawing, Circle, String
 from datetime import date
+import re
 
 def safe_str(value, transform=None):
     if pd.isna(value):
@@ -202,3 +203,25 @@ def build_validation_output(results):
     if results:
         return (pd.concat(results, ignore_index=True).sort_values(["case_mbr_key", "reason"], ignore_index=True))
     return pd.DataFrame(columns=["case_mbr_key", "reason"])
+
+# Removes line breaks, spaces and converts to lowercase.
+def normalise_text(value):
+    if pd.isna(value):
+        return ""
+
+    return re.sub(
+        r"\s+",
+        "",
+        str(value).strip().lower())
+
+# Removes amount formats such as thousand separators
+def normalise_currency_value(value):
+
+    value = str(value)
+
+    value = value.replace("R", "")
+    value = value.replace(" ", "")
+    value = value.replace(",", "")
+    value = value.replace("-", "")
+
+    return value

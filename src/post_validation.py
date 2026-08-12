@@ -1,7 +1,7 @@
 from pypdf import PdfReader
 import difflib
 import pandas as pd
-import re
+from utils import normalise_text, normalise_currency_value
 
 def extract_pdf_metadata(pdf_path):
     reader = PdfReader(pdf_path)
@@ -56,103 +56,60 @@ def validate_page_count(
         "status": (
             "PASS"
             if expected_pages == actual_pages
-            else "FAIL"
-        )
-    }]
-
-def normalise_text(value):
-    """
-    Removes line breaks, spaces and converts to lowercase.
-    Useful for PDF extraction issues.
-    """
-
-    if pd.isna(value):
-        return ""
-
-    return re.sub(
-        r"\s+",
-        "",
-        str(value).strip().lower()
-    )
+            else "FAIL")}]
 
 def validate_member_fields(case_mbr_key, member_row, pdf_text):
 
     pdf_text = normalise_text(pdf_text)
     results = []
     checks = [
-        {
-            "field_name": "Member Name",
-            "expected": f"{member_row['firstname']} {member_row['lastname']}".strip().lower()
-        },
-        {
-            "field_name": "Tax Number",
-            "expected": str(member_row["tax_ref_no"]).lower()
-        },
-        {
-            "field_name": "Member Number",
-            "expected": str(member_row["mbr_no"]).lower()
-        },
-        {
-            "field_name": "Plan Name",
-            "expected": str(member_row["plan_nm"]).lower()
-        },
-        {
-            "field_name": "Contract Number",
-            "expected": str(member_row["cont_no"]).lower()
-        },
-        {
-            "field_name": "Billing Group",
-            "expected": str(member_row["bill_group"]).lower()
-        },
-        {
-            "field_name": "Payroll Number",
-            "expected": str(member_row["pyrl_no"]).lower()
-        },
-        {
-            "field_name": "Prior Number",
-            "expected": str(member_row["pr_mbr_no"]).lower()
-        },
-        {
-            "field_name": "Retirement Date",
-            "expected": pd.to_datetime(
-                member_row["nrd"]
-            ).strftime("%d/%m/%Y").lower()
-        },
-        {
-            "field_name": "Date Of Birth",
-            "expected": pd.to_datetime(
-                member_row["birthdt"]
-            ).strftime("%d/%m/%Y").lower()
-        },
-        {
-            "field_name": "Join Fund",
-            "expected": pd.to_datetime(
-                member_row["join_scheme_dt"]
-            ).strftime("%d/%m/%Y").lower()
-        },
-        {
-            "field_name": "Join Company",
-            "expected": pd.to_datetime(
-                member_row["join_dt"]
-            ).strftime("%d/%m/%Y").lower()
-        },
-        {
-            "field_name": "ID Number",
-            "expected": str(member_row["natlidno"]).lower()
-        },
-        {
-            "field_name": "Client Number",
-            "expected": str(member_row["nameid"]).lower()
-        },
-        {
-            "field_name": "Cell Phone",
-            "expected": str(member_row["mobilephone"]).lower()
-        },
-        {
-            "field_name": "Email",
-            "expected": str(member_row["email_addr"]).lower()
-        }
-    ]
+        {"field_name": "Member Name",
+        "expected": f"{member_row['firstname']} {member_row['lastname']}".strip().lower()},
+
+        {"field_name": "Tax Number",
+         "expected": str(member_row["tax_ref_no"]).lower()},
+
+        {"field_name": "Member Number",
+         "expected": str(member_row["mbr_no"]).lower()},
+
+        {"field_name": "Plan Name",
+         "expected": str(member_row["plan_nm"]).lower()},
+
+        {"field_name": "Contract Number",
+         "expected": str(member_row["cont_no"]).lower()},
+
+        {"field_name": "Billing Group",
+         "expected": str(member_row["bill_group"]).lower()},
+
+        {"field_name": "Payroll Number",
+         "expected": str(member_row["pyrl_no"]).lower()},
+
+        {"field_name": "Prior Number",
+         "expected": str(member_row["pr_mbr_no"]).lower()},
+
+        {"field_name": "Retirement Date",
+         "expected": pd.to_datetime(member_row["nrd"]).strftime("%d/%m/%Y").lower()},
+
+        {"field_name": "Date Of Birth",
+         "expected": pd.to_datetime(member_row["birthdt"]).strftime("%d/%m/%Y").lower()},
+
+        {"field_name": "Join Fund",
+         "expected": pd.to_datetime(member_row["join_scheme_dt"]).strftime("%d/%m/%Y").lower()},
+
+        {"field_name": "Join Company",
+         "expected": pd.to_datetime(member_row["join_dt"]).strftime("%d/%m/%Y").lower()},
+
+        {"field_name": "ID Number",
+         "expected": str(member_row["natlidno"]).lower()},
+
+        {"field_name": "Client Number",
+         "expected": str(member_row["nameid"]).lower()},
+
+        {"field_name": "Cell Phone",
+         "expected": str(member_row["mobilephone"]).lower()},
+
+        {"field_name": "Email",
+         "expected": str(member_row["email_addr"]).lower()}]
 
     for check in checks:
         expected = normalise_text(check["expected"])
@@ -169,21 +126,9 @@ def validate_member_fields(case_mbr_key, member_row, pdf_text):
             "field_name": check["field_name"],
             "expected": expected,
             "found": found,
-            "status": status
-        })
+            "status": status})
 
     return results
-
-def normalise_amount(value):
-
-    value = str(value)
-
-    value = value.replace("R", "")
-    value = value.replace(" ", "")
-    value = value.replace(",", "")
-    value = value.replace("-", "")
-
-    return value
 
 def validate_salary(case_mbr_key, salary, pdf_text):
     results = []
@@ -197,17 +142,15 @@ def validate_salary(case_mbr_key, salary, pdf_text):
     ]
 
     for field_name, expected in salary_checks:
-        salary_expected = normalise_amount(expected)
+        salary_expected = normalise_currency_value(expected)
 
         results.append({
             "case_mbr_key": case_mbr_key,
             "section": "Salary and Contribution",
             "field_name": field_name,
             "expected": expected,
-            "found":
-                (expected if salary_expected in pdf_text else "NOT FOUND"),
-            "status":
-                ("PASS" if salary_expected in pdf_text else "FAIL")})
+            "found": (expected if salary_expected in pdf_text else "NOT FOUND"),
+            "status": ("PASS" if salary_expected in pdf_text else "FAIL")})
 
     return results
 
@@ -233,13 +176,11 @@ def validate_contribution_history(case_mbr_key, contribution_history, transactio
             results.append({
                 "case_mbr_key": case_mbr_key,
                 "section": "Contribution History",
-                "row_number": row_num,
+                "month number": row_num,
                 "field_name": field_name,
                 "expected": expected,
-                "found":
-                    (expected if expected_text in pdf_text else "NOT FOUND"),
-                "status":
-                    ("PASS" if expected_text in pdf_text else "FAIL")})
+                "found": (expected if expected_text in pdf_text else "NOT FOUND"),
+                "status": ("PASS" if expected_text in pdf_text else "FAIL")})
         
     acc_checks = [
     ("Opening Balance", transaction_summary.opening_balance),
@@ -252,23 +193,20 @@ def validate_contribution_history(case_mbr_key, contribution_history, transactio
     ("Accumulated credit", transaction_summary.accumulated_credit)
     ]
     
-    for field_name2, acc_expected in acc_checks:
-        expected_acc_text = normalise_amount(acc_expected)
+    for transaction_field_name, acc_expected in acc_checks:
+        expected_acc_text = normalise_currency_value(acc_expected)
 
         results.append({
             "case_mbr_key": case_mbr_key,
             "section": "Account Transactions",
-            "row_number": 1,
-            "field_name": field_name2,
+            "field_name": transaction_field_name,
             "expected": acc_expected,
-            "found":
-                (acc_expected if expected_acc_text in pdf_text else "NOT FOUND"),
-            "status":
-                ("PASS" if expected_acc_text in pdf_text else "FAIL")})
+            "found": (acc_expected if expected_acc_text in pdf_text else "NOT FOUND"),
+            "status": ("PASS" if expected_acc_text in pdf_text else "FAIL")})
 
     admin_fee_total = contribution_history.totals.admin_fee
-    admin_fee_expected = normalise_amount(admin_fee_total)
-    admin_fee_pdf = normalise_amount(pdf_text)
+    admin_fee_expected = normalise_currency_value(admin_fee_total)
+    admin_fee_pdf = normalise_currency_value(pdf_text)
 
     results.append({
     "case_mbr_key": case_mbr_key,
@@ -276,10 +214,8 @@ def validate_contribution_history(case_mbr_key, contribution_history, transactio
     "row_number": None,
     "field_name": "Total Admin Fee",
     "expected": admin_fee_expected,
-    "found": 
-        (admin_fee_total if admin_fee_expected in admin_fee_pdf else "NOT FOUND"),
-    "status": 
-        ("PASS" if admin_fee_expected in admin_fee_pdf else "FAIL")})
+    "found": (admin_fee_total if admin_fee_expected in admin_fee_pdf else "NOT FOUND"),
+    "status": ("PASS" if admin_fee_expected in admin_fee_pdf else "FAIL")})
 
     return results
 
@@ -296,18 +232,15 @@ def validate_investment(case_mbr_key, investment_portfolio, investment_pot, pdf_
     ]
 
     for field_name, portfolio_expected in portfolio_checks:
-        portfolio_expected_amt = normalise_amount(portfolio_expected)
+        portfolio_expected_amt = normalise_currency_value(portfolio_expected)
 
         results.append({
         "case_mbr_key": case_mbr_key,
         "section": "Investment Portfolios",
-        "row_number": 1,
         "field_name": field_name,
         "expected": portfolio_expected,
-        "found":
-            (portfolio_expected if portfolio_expected_amt in pdf_text else "NOT FOUND"),
-        "status":
-            ("PASS" if portfolio_expected_amt in pdf_text else "FAIL")})
+        "found": (portfolio_expected if portfolio_expected_amt in pdf_text else "NOT FOUND"),
+        "status": ("PASS" if portfolio_expected_amt in pdf_text else "FAIL")})
 
     pot_checks = [
         ("Provident Fund", investment_pot.two_pot.vested_provident),
@@ -316,18 +249,16 @@ def validate_investment(case_mbr_key, investment_portfolio, investment_pot, pdf_
         ("Retirement Pot", investment_pot.two_pot.retirement_pot)
     ]
 
-    for field_name2, pot_expected in pot_checks:
-        pot_expected_amt = normalise_amount(pot_expected)
+    for pot_field_name, pot_expected in pot_checks:
+        pot_expected_amt = normalise_currency_value(pot_expected)
 
         results.append({
         "case_mbr_key": case_mbr_key,
         "section": "Total Retirement Savings",
-        "field_name": field_name2,
+        "field_name": pot_field_name,
         "expected": pot_expected,
-        "found":
-            (pot_expected if pot_expected_amt in pdf_text else "NOT FOUND"),
-        "status":
-            ("PASS" if pot_expected_amt in pdf_text else "FAIL")})
+        "found": (pot_expected if pot_expected_amt in pdf_text else "NOT FOUND"),
+        "status": ("PASS" if pot_expected_amt in pdf_text else "FAIL")})
 
     return results
 
@@ -344,16 +275,14 @@ def validate_benefits(case_mbr_key, benefits, pdf_text):
         ("Spouse's Assurance", benefits.spouse_assurance)]
 
     for field_name, expected in benefits_check:
-        benefits_expected = normalise_amount(expected)
+        benefits_expected = normalise_currency_value(expected)
 
         results.append({
         "case_mbr_key": case_mbr_key,
         "section": "Benefit Overiview",
         "field_name": field_name,
         "expected": expected,
-        "found":
-            (expected if benefits_expected in pdf_text else "NOT FOUND"),
-        "status":
-            ("PASS" if benefits_expected in pdf_text else "FAIL")})
+        "found": (expected if benefits_expected in pdf_text else "NOT FOUND"),
+        "status": ("PASS" if benefits_expected in pdf_text else "FAIL")})
 
     return results
