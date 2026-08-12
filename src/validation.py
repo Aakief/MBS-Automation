@@ -109,7 +109,7 @@ def validate_all(member_statement_df_raw):
     member_statement_df_raw_copy = member_statement_df_raw.copy()
 
     # Normalise dates
-    member_statement_df_raw_copy = normalize_dates(member_statement_df_raw_copy, ["birthdt","join_scheme_dt","nrd","join_dt","pyrl_dt"])
+    member_statement_df_raw_copy = normalize_dates(member_statement_df_raw_copy, ["birthdt","join_scheme_dt","nrd","past_service_dt","pyrl_dt"])
 
     # Create data profile
     member_statement_profile_df = create_data_profile(member_statement_df_raw_copy)

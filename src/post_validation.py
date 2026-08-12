@@ -67,7 +67,7 @@ def validate_member_fields(case_mbr_key, member_row, pdf_text):
         "expected": f"{member_row['firstname']} {member_row['lastname']}".strip().lower()},
 
         {"field_name": "Tax Number",
-         "expected": str(member_row["tax_ref_no"]).lower()},
+         "expected": str(member_row["tax_ref_no_payroll"]).lower()},
 
         {"field_name": "Member Number",
          "expected": str(member_row["mbr_no"]).lower()},
@@ -79,7 +79,7 @@ def validate_member_fields(case_mbr_key, member_row, pdf_text):
          "expected": str(member_row["cont_no"]).lower()},
 
         {"field_name": "Billing Group",
-         "expected": str(member_row["bill_group"]).lower()},
+         "expected": str(member_row["mbr_bill_grp"]).lower()},
 
         {"field_name": "Payroll Number",
          "expected": str(member_row["pyrl_no"]).lower()},
@@ -94,10 +94,10 @@ def validate_member_fields(case_mbr_key, member_row, pdf_text):
          "expected": pd.to_datetime(member_row["birthdt"]).strftime("%d/%m/%Y").lower()},
 
         {"field_name": "Join Fund",
-         "expected": pd.to_datetime(member_row["join_scheme_dt"]).strftime("%d/%m/%Y").lower()},
+         "expected": pd.to_datetime(member_row["past_service_dt"]).strftime("%d/%m/%Y").lower()},
 
         {"field_name": "Join Company",
-         "expected": pd.to_datetime(member_row["join_dt"]).strftime("%d/%m/%Y").lower()},
+         "expected": pd.to_datetime(member_row["join_scheme_dt"]).strftime("%d/%m/%Y").lower()},
 
         {"field_name": "ID Number",
          "expected": str(member_row["natlidno"]).lower()},
@@ -106,10 +106,10 @@ def validate_member_fields(case_mbr_key, member_row, pdf_text):
          "expected": str(member_row["nameid"]).lower()},
 
         {"field_name": "Cell Phone",
-         "expected": str(member_row["mobilephone"]).lower()},
+         "expected": str(member_row["recent_phone"]).lower()},
 
         {"field_name": "Email",
-         "expected": str(member_row["email_addr"]).lower()}]
+         "expected": str(member_row["recent_email"]).lower()}]
 
     for check in checks:
         expected = normalise_text(check["expected"])

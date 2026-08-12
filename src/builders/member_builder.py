@@ -22,7 +22,7 @@ def build_member(mbs_data) -> Member:
 
         scheme_code = safe_str(latest_mbs_data["cont_no"], str.upper),
 
-        bill_group = safe_str(latest_mbs_data["bill_group"], str.title),
+        bill_group = safe_str(latest_mbs_data["mbr_bill_grp"], str.title),
 
         payroll_number = safe_str(latest_mbs_data["pyrl_no"], str.upper),
 
@@ -32,19 +32,19 @@ def build_member(mbs_data) -> Member:
 
         date_of_birth = safe_date(latest_mbs_data["birthdt"]),
 
-        join_fund = safe_date(latest_mbs_data["join_scheme_dt"]),
+        join_fund = safe_date(latest_mbs_data["past_service_dt"]),
 
-        join_company = safe_date(latest_mbs_data["join_dt"]),
+        join_company = safe_date(latest_mbs_data["join_scheme_dt"]),
 
         id_number = nat_id if nat_id else passport,
 
-        tax_number = safe_str(latest_mbs_data["tax_ref_no"], str.upper),
+        tax_number = safe_str(latest_mbs_data["tax_ref_no_payroll"], str.upper),
 
         client_number = safe_str(latest_mbs_data["nameid"], str.upper),
 
-        cell_phone = safe_str(latest_mbs_data["mobilephone"]),
+        cell_phone = safe_str(latest_mbs_data["recent_phone"]),
 
-        email = safe_str(latest_mbs_data["email_addr"], str.lower),
+        email = safe_str(latest_mbs_data["recent_email"], str.lower),
 
         pay_centre = safe_str(latest_mbs_data["pay_centre"], str.title)
     )
