@@ -123,5 +123,3 @@ def validate_all(member_statement_df_raw):
     invalid_case_mbr_keys = (invalid_members_df["case_mbr_key"].unique())
     member_statement_validated = (member_statement_df_raw[~member_statement_df_raw["case_mbr_key"].isin(invalid_case_mbr_keys)])
     member_statement_validated.to_csv("../data/primary/mbs_dataset_validated.csv", index=False)
-
-    return member_statement_validated

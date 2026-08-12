@@ -1,6 +1,7 @@
 .venv/
 data/
 statements/
+post validations/
 
 __pycache__/
 *.py[cod]
