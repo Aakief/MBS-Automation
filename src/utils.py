@@ -185,7 +185,7 @@ def create_data_profile(df):
 def normalize_dates(df, columns): # Convert specified columns to dates. Invalid values become NaT.
     df = df.copy()
     for column in columns:
-        df[column] = pd.to_datetime(df[column], errors="coerce").dt.date
+        df[column] = pd.to_datetime(df[column], errors="coerce")
     return df
 
 def add_reason(results, case_mbr_keys, reason):
@@ -202,3 +202,28 @@ def build_validation_output(results):
     if results:
         return (pd.concat(results, ignore_index=True).sort_values(["case_mbr_key", "reason"], ignore_index=True))
     return pd.DataFrame(columns=["case_mbr_key", "reason"])
+
+# Function to do a checksum ID validation
+def valid_sa_id_checksum(natlidno):
+    natlidno = str(natlidno).strip()
+
+    # ID no. must be exactly 13 digits
+    if len(natlidno) != 13 or not natlidno.isdigit():
+        return False
+
+    # Sum odd positions: 1,3,5,7,9,11,13
+    odd_sum = sum(int(natlidno[i])
+        for i in [0, 2, 4, 6, 8, 10, 12])
+
+    # Even positions 2,4,6,8,10,12
+    # Python indexes are 1,3,5,7,9,11
+    even_sum = 0
+    for i in [1, 3, 5, 7, 9, 11]:  
+        doubled = int(natlidno[i]) * 2
+        if doubled > 9:
+            doubled -= 9
+        even_sum += doubled
+
+    # Sum both odd position total and processed even position total
+    total = odd_sum + even_sum
+    return total % 10 == 0

@@ -1,170 +1,127 @@
 import pandas as pd
-from utils import validate_required_field, add_reason, build_validation_output, normalize_dates, create_data_profile
+from utils import validate_required_field, add_reason, build_validation_output, normalize_dates, create_data_profile, valid_sa_id_checksum
 
-# MEMBER DETAILS VALIDATION============================================================================================================#
-def validate_member_details(df):
+# MEMBER STATEMENT TABLE VALIDATION================================================================================================#
+def validate_member_statement(df):
     results = []
 
-    # Scheme Numbers (cont_no) are not NULL.
+    # MEMBER DETAILS
+    # There must be a case member key
+    validate_required_field(df, "case_mbr_key", results, "case_mbr_key is null or empty")
+
+    # There must be a scheme number.
     validate_required_field(df, "cont_no", results, "Scheme Number is null or empty")
 
-    # Plan Name (plan_nm) is not NULL.
+    # Scheme Number must start with 1 uppercase letter, followed by 6 digits and 1 uppercase letter
+    mask = (df["cont_no"].notna() & (~df["cont_no"].astype(str).str.strip().str.fullmatch(r"[A-Z]\d{6}[A-Z]")))
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Scheme Number format is invalid")
+
+    # There must be a plan name.
     validate_required_field(df, "plan_nm", results, "Plan Name is null or empty")
 
-    # Members (mbr_no) are not NULL.
+    # There must be a member number
     validate_required_field(df, "mbr_no", results, "Member Number is null or empty")
 
-    # Join Scheme date (join_scheme_dt) must be NOT NULL
+    # There must be a join date
     mask = df["join_scheme_dt"].isna()
     add_reason(results, df.loc[mask, "case_mbr_key"], "Join Scheme Date is null")
 
-    # Birth date (birthdt) must be NOT NULL
+    # There must be a birth date 
     mask = df["birthdt"].isna()
     add_reason(results, df.loc[mask, "case_mbr_key"], "Birth Date is null")
 
-    # Join Scheme date (join_scheme_dt) must be NOT NULL and NOT less than birth date (birthdt).
+    # The join scheme date must be after the birth date.
     mask = (df["join_scheme_dt"].notna() & df["birthdt"].notna() & (df["join_scheme_dt"] < df["birthdt"]))
     add_reason(results, df.loc[mask, "case_mbr_key"], "Join Scheme Date is before Birth Date")
 
-    # NRD (nrd) must be NOT NULL
+    # There must be an NRD (Next Retirement Date)
     mask = df["nrd"].isna()
     add_reason(results, df.loc[mask, "case_mbr_key"], "NRD is null")
 
-    # NRD (nrd) must be GREATER than the join scheme date (join_scheme_dt).
+    # NRD must be greater than the Join Scheme Date.
     mask = (df["nrd"].notna() & df["join_scheme_dt"].notna() & (df["nrd"] <= df["join_scheme_dt"]))
     add_reason(results, df.loc[mask, "case_mbr_key"], "NRD is not greater than Join Scheme Date")
 
-    # National ID validations
+    # NATIONAL ID VALIDATIONS
     natlidno = df["natlidno"].astype("string").str.strip()
     passport_no = df["passport_no"].astype("string").str.strip()
-    
-    # National ID AND passport Number must NOT be BOTH NULL.
+
+    # There must be either a passport or an ID number
     mask = ((natlidno.isna() | (natlidno == "")) & (passport_no.isna() | (passport_no == "")))
     add_reason(results, df.loc[mask, "case_mbr_key"], "Both National ID Number and Passport Number are null")
 
-    # National ID Number must be 13 digits.
+    # National ID must be 13 digits.
     mask = (natlidno.notna() & (natlidno != "") & ~natlidno.str.fullmatch(r"\d{13}"))
     add_reason(results, df.loc[mask, "case_mbr_key"], "National ID Number is not 13 digits")
 
-    # First 6 digits of ID must match birth date (YYMMDD)
-    valid_id_mask = (df["birthdt"].notna() & natlidno.notna() & (natlidno != "") & natlidno.str.fullmatch(r"\d{13}"))
-    birth_date_string = pd.to_datetime(df["birthdt"], errors="coerce").dt.strftime("%y%m%d")
+    # National ID must pass the checksum (consistent with the heartbeat)
+    valid_id_mask = (natlidno.notna() & (natlidno != "") & natlidno.str.fullmatch(r"\d{13}"))
+    mask = (valid_id_mask & ~natlidno.apply(valid_sa_id_checksum))
+    add_reason(results, df.loc[mask, "case_mbr_key"], "National ID Number checksum is invalid")
 
-    mask = (valid_id_mask & (natlidno.str[:6] != birth_date_string))
-    add_reason(results, df.loc[mask, "case_mbr_key"], "First 6 digits of National ID Number do not match Birth Date")
+    # CONTRIBUTIONS
+    # There must be an Annual Salary (must not be NULL)
+    mask = (df["ann_salar"].isna() | (df["ann_salar"].astype(str).str.strip() == ""))
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Salary is null or empty")
 
-    # Gender must be populated
-    gender = df["gender"].astype("string").str.strip().str.lower()
+    # Annual Salary must be numeric
+    ann_salar = pd.to_numeric(df["ann_salar"], errors="coerce")
+    mask = (df["ann_salar"].notna() & (df["ann_salar"].astype(str).str.strip() != "") & ann_salar.isna())
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Salary is not numeric")
 
-    mask = gender.isna() | (gender == "")
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Gender is null or empty")
+    # Annual Salary must not be 0
+    mask = ann_salar == 0
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Salary is zero")
 
-    # Gender must match ID number
-    gender_number = pd.to_numeric(natlidno.str[6:10], errors="coerce")
+    # There must be an Annual Risk Salary (must not be NULL)
+    mask = (df["ann_risk"].isna() | (df["ann_risk"].astype(str).str.strip() == ""))
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Risk Salary is null or empty")
 
-    derived_gender = gender_number.where(gender_number >= 5000, other=-1)
-    derived_gender = derived_gender.apply(lambda x: "male" if x >= 5000 else "female")
+    # Annual Risk salary must be numeric
+    ann_risk = pd.to_numeric(df["ann_risk"], errors="coerce")
+    mask = (df["ann_risk"].notna() & (df["ann_risk"].astype(str).str.strip() != "") & ann_risk.isna())
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Risk Salary is not numeric")
 
-    # Only compare gender when it is Male or Female
-    valid_gender_mask = gender.isin(["male", "female"])
-    mask = (valid_id_mask & valid_gender_mask & (gender != derived_gender))
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Gender does not match National ID Number")
+    # Annual Risk salary must not be 0.
+    mask = ann_risk == 0
+    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Risk Salary is zero")
 
-    return build_validation_output(results)
-
-# CONTRIBUTIONS VALIDATION=============================================================================================================#
-def validate_transactions(df):
-    results = []
-
-    # Contribution Date must not be NULL and must be a valid date.
-    mask = df["contribution_dt"].isna()
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Contribution Date (contribution_dt) is null or invalid")
-
-    # Annual Pension Salary must be numeric.
-    ann_pen_salary = pd.to_numeric(df["ann_pen_salary"], errors="coerce")
-
-    mask = ann_pen_salary.isna()
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Pension Salary (ann_pen_salary) is not numeric")
-
-    mask = ann_pen_salary == 0
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Pension Salary (ann_pen_salary) is zero")
-
-    # Annual Risk Salary must be numeric.
-    ann_risk_salary = pd.to_numeric(df["ann_risk_salary"], errors="coerce")
-
-    mask = ann_risk_salary.isna()
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Risk Salary (ann_risk_salary) is not numeric")
-
-    mask = ann_risk_salary == 0
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Risk Salary (ann_risk_salary) is zero")
-
-    # Employee Contribution must not be NULL or empty.
-    validate_required_field(df, "member_contribution", results, "Member Contribution (member_contribution) is null or empty")
-
-    member_contribution = pd.to_numeric(df["member_contribution"], errors="coerce")
-
-    mask = (df["member_contribution"].notna() & (df["member_contribution"].astype(str).str.strip() != "") & member_contribution.isna())
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Member Contribution (member_contribution) is not numeric")
-
-    # Employer Contribution must not be NULL or empty and must be a valid numeric.
-    validate_required_field(df, "employer_contribution", results, "Employer Contribution (employer_contribution) is null or empty")
-
-    employer_contribution = pd.to_numeric(df["employer_contribution"], errors="coerce")
-    mask = (df["employer_contribution"].notna() & (df["employer_contribution"].astype(str).str.strip() != "") & employer_contribution.isna())
-    add_reason(results, df.loc[mask, "case_mbr_key"], "Employer Contribution (employer_contribution) is not numeric")
+    # ACCUMULATED CREDIT RECONCILIATION
+    # Accumulated Credit = Trading Fund + Moderate + Conservative + Growth
+    calculated_acc_credit = (
+        pd.to_numeric(df["trading_fund"], errors="coerce").fillna(0)
+        +
+        pd.to_numeric(df["moderate"], errors="coerce").fillna(0)
+        +
+        pd.to_numeric(df["conservative"], errors="coerce").fillna(0)
+        +
+        pd.to_numeric(df["growth"], errors="coerce").fillna(0)
+    )
+    acc_credit = pd.to_numeric(df["acc_credit"], errors="coerce")
+    mask = (acc_credit.notna() & ((acc_credit - calculated_acc_credit).abs() > 0.01))
+    add_reason(results,df.loc[mask, "case_mbr_key"], "Accumulated Credit does not equal Trading Fund plus Moderate plus Conservative plus Growth")
 
     return build_validation_output(results)
 
-# TWO POT AND INVESTMENTS VALIDATION===================================================================================================#
-def validate_two_pot_investment(df):
-    results = []
+def validate_all(member_statement_df_raw):
 
-    # Case Member Key required
-    validate_required_field(df, "case_mbr_key", results, "case_mbr_key is null or empty")
-    return build_validation_output(results)
+    # Create working copy
+    member_statement_df_raw_copy = member_statement_df_raw.copy()
 
-def validate_all(member_detail_df_raw, transactions_df_raw, tp_investment_df_raw):
-    # MEMBER DETAILS
-    member_detail_df_raw_copy = member_detail_df_raw.copy()
-    member_detail_df_raw_copy = normalize_dates(member_detail_df_raw_copy, ["join_scheme_dt", "birthdt", "nrd"])
-    member_details_profile_df = create_data_profile(member_detail_df_raw_copy)
-    member_details_profile_df.to_csv("../data/primary/member_details_data_profile.csv", index=False)
-    invalid_members_df = validate_member_details(member_detail_df_raw_copy)
-    invalid_members_df.to_csv("../data/primary/invalid_member_details_case_key.csv", index=False)
+    # Normalise dates
+    member_statement_df_raw_copy = normalize_dates(member_statement_df_raw_copy, ["birthdt","join_scheme_dt","nrd","join_dt","pyrl_dt"])
 
-    # Filter out invalid members
-    invalid_member_case_mbr_keys = invalid_members_df["case_mbr_key"].unique()
-    member_detail_df_validated = member_detail_df_raw[~member_detail_df_raw["case_mbr_key"].isin(invalid_member_case_mbr_keys)]
+    # Create data profile
+    member_statement_profile_df = create_data_profile(member_statement_df_raw_copy)
+    member_statement_profile_df.to_csv("../data/primary/mbs_data_profile.csv", index=False)
 
-    member_detail_df_validated = member_detail_df_raw
-    member_detail_df_validated.to_csv('../data/primary/member_detail_validated.csv', index=False)
+    # Run validations
+    invalid_members_df = validate_member_statement(member_statement_df_raw_copy)
+    invalid_members_df.to_csv("../data/primary/mbs_validation.csv", index=False)
 
-    # TRANSACTIONS
-    transactions_df_raw_copy = transactions_df_raw.copy()
-    transactions_df_raw_copy = normalize_dates(transactions_df_raw_copy, ["contribution_dt"])
-    transactions_profile_df = create_data_profile(transactions_df_raw_copy)
-    transactions_profile_df.to_csv("../data/primary/transactions_data_profile.csv", index=False)
-    invalid_transactions_df = validate_transactions(transactions_df_raw_copy)
-    invalid_transactions_df.to_csv("../data/primary/invalid_transactions.csv", index=False)
-    
-    # Filter out invalid members
-    invalid_member_case_mbr_keys = invalid_transactions_df["case_mbr_key"].unique()
-    trasnsactions_df_validated = transactions_df_raw[~transactions_df_raw["case_mbr_key"].isin(invalid_member_case_mbr_keys)]
+    # Remove invalid members
+    invalid_case_mbr_keys = (invalid_members_df["case_mbr_key"].unique())
+    member_statement_validated = (member_statement_df_raw[~member_statement_df_raw["case_mbr_key"].isin(invalid_case_mbr_keys)])
+    member_statement_validated.to_csv("../data/primary/mbs_dataset_validated.csv", index=False)
 
-    # trasnsactions_df_validated = transactions_df_raw
-    trasnsactions_df_validated.to_csv('../data/primary/transactions_validated.csv', index=False)
-
-    # TWO POT AND INVESTMENT
-    two_pot_investment_df_raw_copy = tp_investment_df_raw.copy()
-    two_pot_investment_df_raw_copy = normalize_dates(two_pot_investment_df_raw_copy, ["latest_rbal_dt"])
-    two_pot_profile_df = create_data_profile(two_pot_investment_df_raw_copy)
-    two_pot_profile_df.to_csv("../data/primary/two_pot_investment_data_profile.csv", index=False)
-    invalid_two_pot_investment_df = validate_two_pot_investment(two_pot_investment_df_raw_copy)
-    invalid_two_pot_investment_df.to_csv("../data/primary/invalid_two_pot_investment.csv", index=False)
-    
-    # Filter out invalid members
-    invalid_member_case_mbr_keys = invalid_two_pot_investment_df["case_mbr_key"].unique()
-    two_pot_investment_validated = tp_investment_df_raw[~tp_investment_df_raw["case_mbr_key"].isin(invalid_member_case_mbr_keys)]
-
-    # two_pot_investment_validated = tp_investment_df_raw
-    two_pot_investment_validated.to_csv('../data/primary/two_pot_investment_validated.csv', index=False)
+    return member_statement_validated
