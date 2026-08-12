@@ -2,6 +2,8 @@
 data/
 statements/
 post validations/
+diagrams/
+samples/
 
 __pycache__/
 *.py[cod]
