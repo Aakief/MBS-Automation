@@ -1,3 +1,5 @@
+from unittest import result
+
 import pandas as pd
 from io import BytesIO
 from reportlab.lib.units import mm
@@ -22,7 +24,9 @@ def safe_date(value):
 def total(data, column):
     if data.empty:
         return 0
-    return data[column].sum()
+    result = data[column].sum()
+
+    return 0 if pd.isna(result) else result
 
 def money(value, negative=False):
     if value in (None, ""):
