@@ -20,7 +20,7 @@ CONTENT_W = PAGE_W - 2 * MARGIN_X
 def style():
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle("BodySmall", fontName="Helvetica", fontSize=8.2, leading=10.1, alignment=TA_LEFT))
-    styles.add(ParagraphStyle("Body", fontName="Helvetica", fontSize=10, leading=12.5, alignment=TA_LEFT))
+    styles.add(ParagraphStyle("Body", fontName="Helvetica", fontSize=9, leading=10.1, alignment=TA_LEFT))
     styles.add(ParagraphStyle("BodyJustify", fontName="Helvetica", fontSize=10, leading=12.5, alignment=TA_JUSTIFY))
     styles.add(ParagraphStyle("Bold", fontName="Helvetica-Bold", fontSize=10, leading=12.5))
     styles.add(ParagraphStyle("TitleGreen", fontName="Helvetica-Bold", fontSize=14, leading=17, textColor=GREEN))

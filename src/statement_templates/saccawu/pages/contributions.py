@@ -128,7 +128,7 @@ def build(context, reporting_dt, start_dt, P):
         section_header(P(f"CONTRIBUTIONS FOR THE PERIOD {start_dt.strftime("%d/%m/%Y")} TO {reporting_dt.strftime("%d/%m/%Y")}", "SectionWhite"), width=details_width,bg_col=BLACK,box_col=BLACK),
         cont,
         Spacer(1, 5 * mm),
-        P(f"<br/>Please note:<br/><b><i>The {short_date} contributions may not be included in the Accumulated Credit, "
+        P(f"<br/><b><i>Please note that the {short_date} contributions may not be included in the Accumulated Credit, "
         f"if the contributions were not received and allocated prior to {full_date}.</i></b>", "BodySmall"),
         Spacer(1, 14 * mm),
         section_header(P(f"ACCOUNT TRANSACTIONS {start_dt.strftime("%d/%m/%Y")} - {reporting_dt.strftime("%d/%m/%Y")}", "SectionWhite"), width=details_width,bg_col=BLACK,box_col=BLACK),
