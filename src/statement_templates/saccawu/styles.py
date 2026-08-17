@@ -14,13 +14,13 @@ GRID = colors.HexColor("#1A1A1A")
 # Keep all layout numbers together so you can tune the template easily.
 MARGIN_X = 20 * mm
 MARGIN_TOP = 10 * mm
-MARGIN_BOTTOM = 20 * mm
+MARGIN_BOTTOM = 10 * mm
 CONTENT_W = PAGE_W - 2 * MARGIN_X
 
 def style():
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle("BodySmall", fontName="Helvetica", fontSize=8.2, leading=10.1, alignment=TA_LEFT))
-    styles.add(ParagraphStyle("Body", fontName="Helvetica", fontSize=10, leading=12.5, alignment=TA_LEFT))
+    styles.add(ParagraphStyle("Body", fontName="Helvetica", fontSize=10, leading=10.1, alignment=TA_LEFT))
     styles.add(ParagraphStyle("BodyJustify", fontName="Helvetica", fontSize=10, leading=12.5, alignment=TA_JUSTIFY))
     styles.add(ParagraphStyle("Bold", fontName="Helvetica-Bold", fontSize=10, leading=12.5))
     styles.add(ParagraphStyle("TitleGreen", fontName="Helvetica-Bold", fontSize=14, leading=17, textColor=GREEN))
@@ -32,43 +32,11 @@ def style():
     styles.add(ParagraphStyle("Link", fontName="Helvetica", fontSize=10, leading=12, textColor=colors.blue))
     styles.add(ParagraphStyle("SubTitle", fontName="Helvetica", fontSize=8.2, leading=10.1, alignment=TA_CENTER))
     styles.add(ParagraphStyle("TinyBoldCenter", parent=styles["TinyBold"], alignment=TA_CENTER))
-    styles.add(
-        ParagraphStyle(
-            "TinyRight",
-            parent=styles["Tiny"],
-            alignment=TA_RIGHT,
-        )
-    )
-    styles.add(
-        ParagraphStyle(
-            "BodySmallRight",
-            parent=styles["BodySmall"],
-            alignment=TA_RIGHT,
-        )
-    )
-
-    styles.add(
-        ParagraphStyle(
-            name="Date",
-            parent=styles["Body"],
-            alignment=TA_RIGHT,
-        )
-    )
-    styles.add(
-        ParagraphStyle(
-            name="BulletBody",
-            parent=styles["Body"],
-            leftIndent=10,      # where wrapped lines start
-            firstLineIndent=-8, # pulls bullet into the margin
-        )
-    )
-    styles.add(
-        ParagraphStyle(
-            name="SubBulletBody",
-            parent=styles["Body"],
-            leftIndent=20,
-            firstLineIndent=-8,
-        )
-    )
+    styles.add(ParagraphStyle("TinyRight", parent=styles["Tiny"], alignment=TA_RIGHT,))
+    styles.add(ParagraphStyle("BodySmallRight", parent=styles["BodySmall"], alignment=TA_RIGHT,))
+    styles.add(ParagraphStyle(name="Date", parent=styles["Body"], alignment=TA_RIGHT,))
+    styles.add(ParagraphStyle(name="BulletBody", parent=styles["Body"], leftIndent=10, firstLineIndent=-8,)) # where wrapped lines start pulls bullet into the margin
+    styles.add(ParagraphStyle(name="SubBulletBody", parent=styles["Body"], leftIndent=20, firstLineIndent=-8,))
+    styles.add(ParagraphStyle("TableIntro",parent=styles["BodySmall"],leftIndent=0,firstLineIndent=0,rightIndent=0,))
     
     return styles

@@ -141,26 +141,12 @@ def build(context, reporting_dt, P):
         rows = [
             [P("<b>Should you die before retirement:</b>", "BodySmall"), ""],
     
-            [
-                P("A Life Assurance Benefit amounting to:", "BodySmall"),
-                P(f"<b>R{death_benefit:,.2f}</b>", "BodySmallRight")
-            ],
+            [P("A Life Assurance Benefit amounting to:", "BodySmall"), P(f"<b>{money(death_benefit)}</b>", "BodySmallRight")],
     
-            [
-                P("<b>PLUS,</b><br/>your Accumulated Credit:", "BodySmall"), #Formatting death benefits section
-                P(f"<b>R{accumulated_credit:,.2f}</b>", "BodySmallRight")
-            ],
-    
-            [
-                P(
-                    "will become payable to your dependants and/or nominated "
-                    "beneficiaries (as determined by the Management Board). "
-                    "This benefit can be paid in cash and/or used to purchase a pension.",
-                    "BodySmall"
-                ),
-                ""
-            ]
-        ]
+            [P("<b>PLUS,</b><br/>your Accumulated Credit:", "BodySmall"), P(f"<b>{money(accumulated_credit)}</b>", "BodySmallRight")],
+
+            [P("will become payable to your dependants and/or nominated beneficiaries (as determined by the Management Board). "
+               "This benefit can be paid in cash and/or used to purchase a pension.", "BodySmall"),""]]
     
         tbl = Table(
             rows,
@@ -174,7 +160,7 @@ def build(context, reporting_dt, P):
             ("VALIGN", (0,0), (-1,-1), "TOP"),
     
             ("LEFTPADDING", (0,0), (-1,-1), 0),
-            ("RIGHTPADDING", (0,0), (-1,-1), 0),
+            ("RIGHTPADDING", (1,1), (1,2), 5 * mm),
     
             ("TOPPADDING", (0,0), (-1,-1), 4),
             ("BOTTOMPADDING", (0,0), (-1,-1), 8),
@@ -194,32 +180,34 @@ def build(context, reporting_dt, P):
         Spacer(1, 2 * mm),
     
         section_header(P("DISABILITY INCOME BENEFIT PLAN", "SectionWhite"), width=table_width,bg_col=BLACK,box_col=BLACK),
-        P("Should you, on medical grounds, become totally unable to continue working after a waiting period, you may qualify for a Disability Income benefit of 75% of your monthly salary. This is subject to the assessment by the Insurer.", "BodySmall"),
-        Spacer(1, 1 * mm),
 
-        note_box(
-            P("<b><i>Please note:</i></b> "
-            "<i>"
-            "If a disability income benefit becomes payable to you, you remain a member "
-            "of the Fund and continue to participate in all the benefits. Therefore, "
-            "the percentage required to continue the Employee contributions will be "
-            "deducted from the Disability Income Benefit and the remainder will be "
-            "payable to you.<br/>"
-            "The Employer contributions (i.e. retirement funding, risk benefit "
-            "premiums and administration fees) to the Fund are covered by the "
-            "insurance policy and paid on your behalf."
-            "</i>", "BodySmall"),
-            width=table_width, 
-            box_col = BLACK
-        ),
+        note_box((P("Should you, on medical grounds, become totally unable to continue working after a waiting period, you may qualify for a Disability Income benefit of 75% of your monthly salary. This is subject to the assessment by the Insurer.", "BodySmall"),
+                Spacer(1, 1 * mm),
+                note_box(
+                P("<b><i>Please note:</i></b> "
+                "<i>"
+                "If a disability income benefit becomes payable to you, you remain a member "
+                "of the Fund and continue to participate in all the benefits. Therefore, "
+                "the percentage required to continue the Employee contributions will be "
+                "deducted from the Disability Income Benefit and the remainder will be "
+                "payable to you.<br/>"
+                "The Employer contributions (i.e. retirement funding, risk benefit "
+                "premiums and administration fees) to the Fund are covered by the "
+                "insurance policy and paid on your behalf."
+                "</i>", "BodySmall"),
+                width=table_width - 2 * 4 * mm, 
+                box_col = BLACK
+        )),width=table_width , box_col = BLACK),
+
         Spacer(1, 2 * mm),
     
         section_header(P("DEATH BENEFITS", "SectionWhite"), width=table_width, bg_col=BLACK,box_col=BLACK),
-        death_benefit_section(
+        note_box(
+        (death_benefit_section(
             context.benefits.death_benefit,
             context.benefits.accumulated_credit,
             width=table_width
-        ),
+        ), 
         Spacer(1, 2 * mm),
     
         boxed_notice(
@@ -227,12 +215,12 @@ def build(context, reporting_dt, P):
             "This will only function as a guide to the Fund when allocating your death benefit. " \
             "Please remember to update the beneficiaries at least once a year and to also identify your financial dependants," \
             " especially if your personal circumstances change i.e. marriage, divorce, birth of child, death of a beneficiary or a dependant.","TinyBold"),
-            width=CONTENT_W,
+            width=CONTENT_W - 5,
             fillColor=LIGHT_GREEN,
             strokeColor=LIGHT_GREEN,
             boxColor=LIGHT_GREEN,
             icon=True
-        ),
+        )), width=table_width, box_col=BLACK),
         Spacer(1, 4 * mm),
     
         P("PLEASE NOTE", "TinyBold"),

@@ -50,7 +50,7 @@ def build(reporting_dt, P):
     P("&nbsp;&nbsp;&bull; You will receive an OTP SMS to complete registration.", "SubBulletBody"), Spacer(1,6*mm) ]
     
 
-    body += [P("You can access Old Mutual educational content, book a meeting with a Retirement Benefits Counsellor,"
+    body += [P("You can access Old Mutual educational content, book a meeting with a Retirement Benefits Counsellor, "
       "download a copy of the Fund Benefit Summary, and more on the Fund’s WhatsApp 072 833 2333.", "Body")
     ]
 
