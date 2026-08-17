@@ -19,7 +19,7 @@ def build(context, logo_image, reporting_dt, P):
         [P("<b>IMPORTANT:</b> Contact the <b>Old Mutual Service Centre</b> "
                        "on <b>0860 45 54 55</b> or <b>0860 20 30 40</b> if any of this information "
                        "is missing, incorrect or has changed. Your employer can also assist by updating the information on payroll",
-                       "Tiny"
+                       "BodySmall"
                    ), "", "", ""],
     ]
     

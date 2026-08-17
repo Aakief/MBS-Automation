@@ -3,7 +3,7 @@ from reportlab.lib.units import mm
 from reportlab.platypus import Spacer, Table, TableStyle
 from reportlab.lib import colors
 
-from utils import money, section_header, boxed_notice
+from utils import money, section_header, boxed_notice, note_box
 from statement_templates.saccawu.styles import BLACK, LIGHT_GREEN, CONTENT_W
 
 
@@ -150,12 +150,12 @@ def build(context, reporting_dt, P):
     
     return [
         section_header(P("INVESTMENT STRATEGY","SectionWhite"), width=table_width, bg_col=BLACK,box_col=BLACK),
-        Spacer(1, 3 * mm),
-        P(
+        note_box(P(
             "The number of years that you have until your normal retirement age determines where your Accumulated Credit is invested. " \
             f"Based on the Lifestage Investment Strategy and the number of years you have until your normal retirement age, your Accumulated Credit as at {full_date} is invested in the following portfolios",
             "BodySmall"
-        ),
+        ), width=table_width, box_col=BLACK),
+
         Spacer(1,4 *mm),
     
         portfolio_table,
@@ -180,8 +180,9 @@ def build(context, reporting_dt, P):
         
         member,
         Spacer(1, 6 * mm),
+        P("<b>Please note:</b>", "BodySmall"),
         P(
-            "Please note: The Savings Pot includes a once-off transfer from your retirement "
+            "The Savings Pot includes a once-off transfer from your retirement "
             "savings balance as of 31 August 2024 (applicable to eligible members).",
             "BodySmall"
         ),
