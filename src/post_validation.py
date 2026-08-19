@@ -94,7 +94,7 @@ def validate_member_fields(case_mbr_key, member_row, pdf_text):
          "expected": pd.to_datetime(member_row["birthdt"]).strftime("%d/%m/%Y").lower()},
 
         {"field_name": "Join Fund",
-         "expected": pd.to_datetime(member_row["past_service_dt"]).strftime("%d/%m/%Y").lower()},
+         "expected": pd.to_datetime(member_row["join_company_dt"]).strftime("%d/%m/%Y").lower()},
 
         {"field_name": "Join Company",
          "expected": pd.to_datetime(member_row["join_scheme_dt"]).strftime("%d/%m/%Y").lower()},
