@@ -32,9 +32,9 @@ def build_member(mbs_data) -> Member:
 
         date_of_birth = safe_date(latest_mbs_data["birthdt"]),
 
-        join_fund = safe_date(latest_mbs_data["past_service_dt"]),
+        join_fund = safe_date(latest_mbs_data["join_scheme_dt"]),
 
-        join_company = safe_date(latest_mbs_data["join_scheme_dt"]),
+        join_company = safe_date(latest_mbs_data["join_company_dt"]),
 
         id_number = nat_id if nat_id else passport,
 
