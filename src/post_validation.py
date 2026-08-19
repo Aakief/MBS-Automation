@@ -227,7 +227,6 @@ def validate_investment(case_mbr_key, investment_portfolio, investment_pot, pdf_
         ("Growth Portfolio", investment_portfolio.portfolio.growth),
         ("Moderate Portfolio", investment_portfolio.portfolio.moderate),
         ("Conservative Portfolio", investment_portfolio.portfolio.conservative),
-        ("Trading Fund", investment_portfolio.portfolio.trading_fund),
         ("Accumulated Credit", investment_portfolio.portfolio.accumulated_credit)
     ]
 

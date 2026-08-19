@@ -87,19 +87,17 @@ def validate_member_statement(df):
     add_reason(results, df.loc[mask, "case_mbr_key"], "Annual Risk Salary is zero")
 
     # ACCUMULATED CREDIT RECONCILIATION
-    # Accumulated Credit = Trading Fund + Moderate + Conservative + Growth
+    # Accumulated Credit = Moderate + Conservative + Growth
     calculated_acc_credit = (
-        pd.to_numeric(df["trading_fund"], errors="coerce").fillna(0)
-        +
         pd.to_numeric(df["moderate"], errors="coerce").fillna(0)
         +
         pd.to_numeric(df["conservative"], errors="coerce").fillna(0)
         +
         pd.to_numeric(df["growth"], errors="coerce").fillna(0)
     )
-    acc_credit = pd.to_numeric(df["acc_credit"], errors="coerce")
+    acc_credit = pd.to_numeric(df["total_rbal"], errors="coerce")
     mask = (acc_credit.notna() & ((acc_credit - calculated_acc_credit).abs() > 0.01))
-    add_reason(results,df.loc[mask, "case_mbr_key"], "Accumulated Credit does not equal Trading Fund plus Moderate plus Conservative plus Growth")
+    add_reason(results,df.loc[mask, "case_mbr_key"], "Accumulated Credit does not equal Moderate plus Conservative plus Growth")
 
     return build_validation_output(results)
 
@@ -109,7 +107,7 @@ def validate_all(member_statement_df_raw):
     member_statement_df_raw_copy = member_statement_df_raw.copy()
 
     # Normalise dates
-    member_statement_df_raw_copy = normalize_dates(member_statement_df_raw_copy, ["birthdt","join_scheme_dt","nrd","join_company_dt","pyrl_dt"])
+    member_statement_df_raw_copy = normalize_dates(member_statement_df_raw_copy, ["birthdt","join_scheme_dt","nrd","join_company_dt","reporting_dt"])
 
     # Create data profile
     member_statement_profile_df = create_data_profile(member_statement_df_raw_copy)

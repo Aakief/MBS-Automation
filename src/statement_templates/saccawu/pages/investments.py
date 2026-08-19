@@ -10,7 +10,6 @@ from statement_templates.saccawu.styles import BLACK, LIGHT_GREEN, CONTENT_W
 def build(context, reporting_dt, P):
     
     full_date = reporting_dt.strftime("%d %B %Y")
-    short_date = reporting_dt.strftime("%b %Y")
 
     table_width = 180 * mm
 
@@ -20,26 +19,23 @@ def build(context, reporting_dt, P):
                 P("PORTFOLIO<br/>","TinyBold"),
                 P("GROWTH<br/>PORTFOLIO","TinyBold"),
                 P("MODERATE<br/>PORTFOLIO","TinyBold"),
-                P("CONSERVATIVE<br/>PORTFOLIO","TinyBold"),
-                P(f"TRADING FUND<br/><font size='7'>(contributions received in {short_date} not invested yet)</font>", "TinyBold"),          
+                P("CONSERVATIVE<br/>PORTFOLIO","TinyBold"),         
                 P("ACCUMULATED<br/>CREDIT","TinyBold")
             ],
             [
                 P("Amount per Portfolio","Tiny"),
                 P(money(context.investments.portfolio.growth), "TinyRight"),
                 P(money(context.investments.portfolio.moderate), "TinyRight"),
-                P(money(context.investments.portfolio.conservative), "TinyRight"),
-                P(money(context.investments.portfolio.trading_fund), "TinyRight"),          
+                P(money(context.investments.portfolio.conservative), "TinyRight"),         
                 P(money(context.investments.portfolio.accumulated_credit), "TinyRight")
             ]
         ],
         colWidths = [
-            table_width * 0.167,
-            table_width * 0.167,
-            table_width * 0.167,
-            table_width * 0.167,
-            table_width * 0.167,
-            table_width * 0.167
+            table_width * 0.20,
+            table_width * 0.20,
+            table_width * 0.20,
+            table_width * 0.20,
+            table_width * 0.20
         ]
     )
     

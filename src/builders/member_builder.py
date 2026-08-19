@@ -4,7 +4,7 @@ from utils import safe_str, safe_date
 def build_member(mbs_data) -> Member:
 
     # Take the latest member information
-    latest_mbs_data = mbs_data.loc[mbs_data["pyrl_dt"].idxmax()]
+    latest_mbs_data = mbs_data.loc[mbs_data["reporting_dt"].idxmax()]
     
     first_name = safe_str(latest_mbs_data["firstname"], str.title)
     last_name = safe_str(latest_mbs_data["lastname"], str.title)
@@ -46,5 +46,5 @@ def build_member(mbs_data) -> Member:
 
         email = safe_str(latest_mbs_data["recent_email"], str.lower),
 
-        pay_centre = safe_str(latest_mbs_data["pay_centre"], str.title)
+        pay_centre = ""
     )
