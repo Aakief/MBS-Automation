@@ -87,7 +87,7 @@ def build_transaction_summary(mbs_data, accumulated_credit, total_contributions)
     
     s14_trf_in = total(mbs_data, "member_s14_in")
     int_trf_in = total(mbs_data, "employer_s14_in")
-    court_divorce = abs(total(mbs_data, "divore_court_order"))
+    court_divorce = abs(total(mbs_data, "divorce_court_order"))
     spot_withdrawals = abs(total(mbs_data, "spot_withdrawal"))
     
     # Take the latest member information
