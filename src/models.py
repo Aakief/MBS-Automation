@@ -92,7 +92,6 @@ class InvestmentPortfolio:
     growth: float
     moderate: float
     conservative: float
-    trading_fund: float
     accumulated_credit: float
     
 @dataclass

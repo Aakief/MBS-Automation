@@ -3,7 +3,7 @@ from models import Salary
 def build_salary(mbs_data) -> Salary:
     
     # Take the latest member information
-    latest_mbs_data = mbs_data.loc[mbs_data["pyrl_dt"].idxmax()]
+    latest_mbs_data = mbs_data.loc[mbs_data["reporting_dt"].idxmax()]
     
     return Salary (
         
